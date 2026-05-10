@@ -1,61 +1,43 @@
-#  Price Tracker Bot
+4. Add your products to the `PRODUCTS` list in `price_tracker.py`
+```python
+   PRODUCTS = [
+       {
+           "name":         "Product Name",
+           "url":          "https://example.com/product",
+           "target_price": 29.99,
+       },
+   ]
+```
 
-Automatically monitors a product price and sends an email alert 
-when the price drops below your target.
-
----
-
-##  Features
-- Checks price automatically every hour
-- Sends instant email alert when price drops
-- Saves full price history to CSV
-- Credentials hidden safely with .env
-- Works on any product page
-
----
-
-##  Sample Price History
-
-| datetime | price |
-|----------|-------|
-| 2026-04-29 20:39:47 | 51.77 |
-| 2026-04-29 21:39:47 | 51.77 |
-| 2026-04-29 22:39:47 | 49.99 |
-
----
-
-##  Built With
-- Python 3.13
-- Requests
-- BeautifulSoup4
-- Smtplib
-- Python-dotenv
-
----
-
-##  How to Run
-1. Clone the repo
-2. Install dependencies:
-   pip install -r requirements.txt
-3. Create .env file:
-   EMAIL_SENDER=your_gmail@gmail.com
-   EMAIL_PASSWORD=your_app_password
-   EMAIL_RECEIVER=receiver@gmail.com
-4. Set your target price in price_tracker.py
-5. Run:
+5. Run
+```bash
    python price_tracker.py
+```
 
 ---
 
-##  Ethical Scraping
+## Ethical Scraping
+
 - 1 hour delay between each price check
+- Retry backoff prevents hammering servers on failure
 - No personal data collected
 - Public product data only
 
 ---
 
-##  Technical Challenge Solved
-Books.toscrape.com returns prices with encoding issues (Â£ instead of £) 
-due to character encoding mismatches. Solved by stripping invalid characters 
-and converting prices to floats for accurate numerical comparison against 
-the target price.
+## Technical Challenges Solved
+
+**1. Encoding issues**
+Price values contained encoding artifacts (Â£ instead of £) due to
+character mismatches. Solved by stripping all non-numeric characters
+and converting to float for accurate comparison.
+
+**2. Alert spam**
+Without cooldown logic, the bot would send an alert every hour as
+long as the price stayed below target. Solved by tracking alert state
+per product — only re-alerting if the price recovers then drops again.
+
+**3. Silent failures**
+Network errors previously crashed the entire bot. Solved with retry
+logic and per-product error handling so one failed request doesn't
+stop tracking the rest.
